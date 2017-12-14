@@ -5,16 +5,7 @@ import model
 import scipy.ndimage as ndimage
 import random
 
-datagen = ImageDataGenerator(
-                samplewise_center=True,
-                samplewise_std_normalization=True,
-                rotation_range=90,
-                horizontal_flip=True,
-                vertical_flip=True,
-                zoom_range=0.4,
-                width_shift_range=0.4,
-                height_shift_range=0.4,
-                )
+datagen = ImageDataGenerator()
 
 model = model.generate_model()
 
@@ -27,7 +18,7 @@ random_eps = 2
 check_num = 1
 
 vis = {}
-for e in range(15):
+for e in range(1, 3):
     for i in range(NUM_SAMPLE):
         img_id = train_sub.iloc[i, 0]
         label = train_sub.iloc[i, 1]
@@ -54,21 +45,32 @@ for e in range(15):
 
         predictions = model.predict(org_patches)[:, label]
 
-        if e >= random_eps:
-            if label == 1:
-                predictions[~descrimative_ind[i]] = random.uniform(0, 0.5)
-            else:
-                predictions[~descrimative_ind[i]] = random.uniform(0.5, 1)
-
         height = x.shape[0] // PATCH_SIZE
         width = x.shape[1] // PATCH_SIZE
-        pred_reshape = predictions.reshape((height, width))
+
+        if e > random_eps:
+            predictions[~descrimative_ind[i]] = random.uniform(0, 0.5)
+
+            thresh = np.percentile(predictions, THRESH)
 
         # 为了防止descrimative的数量为零
-        if np.where(gaussian_pred >= thresh)[0].size > org_patches.shape[0] * 0.05:
-            descrimative_ind[i] = np.where(~(gaussian_pred <= thresh))[0]
+            if np.where(predictions >= thresh)[0].size > org_patches.shape[0] * 0.01:
+                descrimative_ind[i] = np.where(predictions >= thresh)[0]
 
-        vis[i] = org_patches, descrimative_ind[i], x.shape
+            vis[i] = org_patches, descrimative_ind[i], x.shape
 
+        else:
+
+            thresh = np.percentile(predictions, 90)
+         # 为了防止descrimative的数量为零
+            if np.where(predictions >= thresh)[0].size > org_patches.shape[0] * 0.01:
+                descrimative_ind[i] = np.where(predictions >= thresh)[0]
+            vis[i] = org_patches, descrimative_ind[i], x.shape, img_id, label
+
+# 可视化
+    if e % 1 == 0:
+        keys = list(vis.keys())
+        visualize_patches(vis[keys[check_num]][2], vis[keys[check_num]][0],
+                          vis[keys[check_num]][1], vis[keys[check_num]][3], vis[keys[check_num]][4])
 
 model.save('store/model.md')
