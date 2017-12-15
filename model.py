@@ -2,7 +2,7 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.models import Sequential
 from keras.layers import Dropout, Flatten, Dense
 from keras.optimizers import Adam, sgd
-from CONFIG import PATCH_SIZE
+from CONFIG import *
 
 def generate_model():
 
@@ -14,10 +14,10 @@ def generate_model():
     model.add(Flatten())
     model.add(Dense(16, activation='relu'))
 
-    model.add(Dropout(0.5))
+    model.add(Dropout(DROPOUT))
     model.add(Dense(2, activation='softmax'))
 
-    adam = sgd(lr=0.0001)
+    adam = sgd(lr=LR)
     model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['mse', 'accuracy'])
 
     return model
