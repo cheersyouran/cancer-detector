@@ -90,4 +90,54 @@ for i in range(NUM_SAMPLE):
 
 
 
+############## Validation Phase ###############
+
+preds_val = []
+for i in range(len(val_sub)):
+    img_id, label, path = val_sub.iloc[i]
+    img = load_img(PATH + 'Dataset_A/data/' + path, grayscale=True)
+    x = img_to_array(img)
+    x = add_zeros(x, PATCH_SIZE)
+    patches = generate_patches(x, PATCH_SIZE)
+    
+    preds = pd.DataFrame(model.predict(patches))
+    preds = preds[(preds.iloc[:, 1]>0.55) | (preds.iloc[:, 1]<0.45)]
+    preds_val.append(np.argmax(preds.values, axis=1))
+
+
+percentages = [sum(pred==1)/len(pred) for pred in preds_val]
+val_result = []
+for p in percentages:
+    if p >= 0.01:
+        val_result.append(1)
+    else:
+        val_result.append(0)
+
+
+############## Test Phase ###############
+
+preds_test, img_id_li = [], []
+for i in range(len(test_sub)):
+    img_id, path = test_sub.iloc[i]
+    img_id_li.append(img_id)
+    img = load_img(PATH + '/Dataset_A/data/' + path, grayscale=True)
+    x = img_to_array(img)
+    x = add_zeros(x, PATCH_SIZE)
+    patches = generate_patches(x, PATCH_SIZE)
+    
+    preds = pd.DataFrame(model.predict(patches))
+    preds = preds[(preds.iloc[:, 1]>0.55) | (preds.iloc[:, 1]<0.45)]
+    preds_test.append(np.argmax(preds.values, axis=1))
+
+
+percentages = [sum(pred==1)/len(pred) for pred in preds_val]
+test_result = []
+for p in percentages:
+    if p >= 0.01:
+        test_result.append(1)
+    else:
+        test_result.append(0)
+
+test_result = pd.DataFrame([img_id_li, test_result], index=['Img_id', 'label']).T
+test_result.to_csv(PATH + CATEGORY + '.csv')
         
