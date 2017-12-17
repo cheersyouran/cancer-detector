@@ -11,7 +11,7 @@ datagen = ImageDataGenerator(
                 vertical_flip=True,
                 )
 
-model = generate_model()
+model = model.generate_model()
 
 pre_descrimative_ind, descrimative_ind = {}, {}
 
