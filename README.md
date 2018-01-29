@@ -1,4 +1,4 @@
-# Project 3 Option 2 Breast Cancer Detection
+## Multi-Instance-Learning to check breast cancer
 
     |-- data
     |   |-- L_CC.csv : L_CC dataset predictions
@@ -17,3 +17,6 @@
     |-- utils.py: Helper functions
     |
     |-- output_test_result.py: Merge the above data files
+
+## Result
+<img src="https://raw.githubusercontent.com/cheersyouran/cancer-detector/master/pic/1.png" alt="2" align=center />
